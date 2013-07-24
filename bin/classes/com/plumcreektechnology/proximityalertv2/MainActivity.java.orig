@@ -47,13 +47,15 @@ public class MainActivity extends FragmentActivity implements ProxConstants, POI
 	private SettingsFragment settingsFragment;
 	private FragmentManager fragMan;
 	private ArrayList<String> treeList;
+<<<<<<< HEAD
 	private Vibrator vibrator;
-	private final long[] VIBRATE_PATTERN = {0, 100, 100, 100, 100, 100};
+	private final long[] VIBRATE_PATTERN = {0, 200, 200, 200, 200, 200};
 	private AudioManager audioman;
 	private PowerManager powerman;
-
-	private MapFragment mapFragment;
+=======
+	private MapFragment mapfrag;
 	private GoogleMap map;
+>>>>>>> 193b623d24d1af95fb25f3e0437c43fb3b60c9e7
 	
 	/**
 	 * service connection global variable for binding to ProxAlertService
@@ -104,16 +106,16 @@ public class MainActivity extends FragmentActivity implements ProxConstants, POI
 		fragAdder(userFragment);
 		runningInterface = false;
 		// map
-		mapFragment = MapFragment.newInstance(); //(MapFragment) fragMan.findFragmentById(R.id.map);
-		map = mapFragment.getMap();
+		mapfrag = MapFragment.newInstance(); //(MapFragment) fragMan.findFragmentById(R.id.map);
+		map = mapfrag.getMap();
 
 		if (map != null) {
 			map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 			map.setMyLocationEnabled(true);
 		} else{
-			Toast.makeText(this, "map is null", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "map is null", Toast.LENGTH_SHORT);
 		}
-		fragAdder(mapFragment);
+		fragAdder(mapfrag);
 	}
 
 	/**
@@ -139,10 +141,7 @@ public class MainActivity extends FragmentActivity implements ProxConstants, POI
 				fragRemover(userFragment);
 			} else if(settingsFragment.isAdded()){
 				fragRemover(settingsFragment);
-			} else if(mapFragment.isAdded()){
-				fragRemover(mapFragment);
 			}
-			
 			getActionBar().hide();
 		}
 		if(dialogAlert) { // if we are creating a dialog regardless
@@ -166,8 +165,9 @@ public class MainActivity extends FragmentActivity implements ProxConstants, POI
 				audioman.playSoundEffect(AudioManager.FX_FOCUS_NAVIGATION_UP);
 				audioman.unloadSoundEffects();
 			}
-			//PowerManager.WakeLock wl = powerman.newWakeLock(PowerManager.ACQUIRE_CAUSES_WAKEUP, "dialog light-up");
-			//wl.acquire(1000);
+			PowerManager.WakeLock wl = powerman.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "dialog light-up");
+			wl.acquire(1000);
+			wl.release();
 		}
 	}
 	
@@ -208,24 +208,12 @@ public class MainActivity extends FragmentActivity implements ProxConstants, POI
 	private void treeGrow() {
 		tree = new TreeMap<String, MyGeofence>();
 		tree.put("Public Library", new MyGeofence("Public Library", 41.289818, -82.216895, RADIUS, EXPIRATION, "http://www.oberlinpl.lib.oh.us/", ICON));
-		tree.put("Hales Gymnasium", new MyGeofence("Hales", 41.294764, -82.223917, RADIUS, EXPIRATION, "http://new.oberlin.edu/student-life/facilities/detail.dot?id=352252&buildingId=30220", ICON));
-		tree.put("Oberlin College Science Center", new MyGeofence("Science Center", 41.294692, -82.221782, RADIUS, EXPIRATION, "http://www.oberlin.edu/science/", ICON));
+		tree.put("South", new MyGeofence("South", 41.289508, -82.221159, RADIUS, EXPIRATION, "http://new.oberlin.edu/office/housing/housing-options/traditional-housing/south.dot", ICON));
+		tree.put("Hales", new MyGeofence("Hales", 41.294764, -82.223917, RADIUS, EXPIRATION, "http://new.oberlin.edu/student-life/facilities/detail.dot?id=352252&buildingId=30220", ICON));
+		tree.put("Science Center", new MyGeofence("Science Center", 41.294692, -82.221782, RADIUS, EXPIRATION, "http://www.oberlin.edu/science/", ICON));
 		tree.put("Laundromat", new MyGeofence("Laundromat", 41.294426, -82.212115, RADIUS, EXPIRATION, "http://en.wiktionary.org/wiki/laundromat", ICON));
 		tree.put("Tank", new MyGeofence("Tank", 41.292088, -82.213263, RADIUS, EXPIRATION, "http://new.oberlin.edu/office/housing/housing-options/co-ops/tank.dot", ICON));
 		tree.put("Arboretum", new MyGeofence("Arboretum", 41.285558, -82.226127, RADIUS, EXPIRATION, "http://new.oberlin.edu/student-life/facilities/detail.dot?id=2111210&buildingId=175090", ICON));
-		tree.put("Allen Memorial Art Museum", new MyGeofence("Allen Memorial Art Museum", 41.293724, -82.216766, RADIUS, EXPIRATION, "http://www.oberlin.edu/amam/", ICON));
-		tree.put("Finney Chapel", new MyGeofence("Finney Chapel", 41.293829, -82.220591, RADIUS, EXPIRATION, "https://new.oberlin.edu/student-life/facilities/detail.dot?id=318922&buildingId=50779", ICON));
-		tree.put("Mudd Library", new MyGeofence("Mudd Library", 41.293208, -82.222833, RADIUS, EXPIRATION, "http://www.oberlin.edu/library/main/", ICON));
-		tree.put("Hall Auditorium", new MyGeofence("Hall Auditorium", 41.292845, -82.216712, RADIUS, EXPIRATION, "http://new.oberlin.edu/student-life/facilities/detail.dot?id=16613&buildingId=30174", ICON));
-		tree.put("Warner Concert Hall", new MyGeofence("Warner Concert Hall", 41.290899, -82.219620, RADIUS, EXPIRATION, "http://new.oberlin.edu/conservatory/facilities/detail.dot?id=30368&buildingId=30202", ICON));
-		tree.put("Eastwood Primary School", new MyGeofence("Eastwood Primary School", 41.292349, -82.209964, RADIUS, EXPIRATION, "http://ocs.schoolwires.net/Domain/8", ICON));
-		tree.put("Prospect Elementary School", new MyGeofence("Prospect Elementary School", 41.290866, -82.228932, RADIUS, EXPIRATION, "http://ocs.schoolwires.net/Domain/9", ICON));
-		tree.put("Langston Middle School", new MyGeofence("Langston Middle School", 41.295852, -82.216600, RADIUS, EXPIRATION, "http://ocs.schoolwires.net/Domain/10", ICON));
-		tree.put("Oberlin High School", new MyGeofence("Oberlin High School", 41.299281, -82.212431, RADIUS, EXPIRATION, "http://ocs.schoolwires.net/Domain/11", ICON));
-		tree.put("Kendal at Oberlin", new MyGeofence("Kendal at Oberlin", 41.301860, -82.214406, RADIUS, EXPIRATION, "http://kao.kendal.org/", ICON));
-		tree.put("Westwood Cemetery", new MyGeofence("Westwood Cemetery", 41.286948, -82.232795, RADIUS, EXPIRATION, "http://www.cityofoberlin.com/Recreation/PARKS/WestwoodCemetery.page", ICON));
-		tree.put("Weltzheimer/Johnson House", new MyGeofence("Weltzheimer/Johnson House", 41.288052, -82.236711, RADIUS, EXPIRATION, "http://www.oberlin.edu/amam/flwright.html", ICON));
-		tree.put("Fairchild Chapel", new MyGeofence("Fairchild Chapel", 41.294630, -82.218761, RADIUS, EXPIRATION, "http://new.oberlin.edu/student-life/facilities/detail.dot?id=30318&buildingId=30196", ICON));
 	}
 
 	/**
@@ -254,7 +242,7 @@ public class MainActivity extends FragmentActivity implements ProxConstants, POI
 			fragReplacer(userFragment);
 			break;
 		case(R.id.map_frag):
-			fragReplacer(mapFragment);
+			fragReplacer(mapfrag);
 			break;
 		}
 		return super.onOptionsItemSelected(item);

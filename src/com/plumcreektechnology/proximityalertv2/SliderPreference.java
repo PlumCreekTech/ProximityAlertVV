@@ -1,139 +1,200 @@
 package com.plumcreektechnology.proximityalertv2;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.preference.Preference;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.TextView;
 
-public class SliderPreference extends Preference implements Preference.OnPreferenceChangeListener{
+public class SliderPreference extends Preference implements OnSeekBarChangeListener {
+	
+	// attribute set gets values from the place it is invoked in XML!!!
+	
+	private final String TAG = getClass().getName();
+	private static final String ANDROIDNS="http://schemas.android.com/apk/res/android";
+	private static final String PCTNS="http://plumcreektechnology.com";
+	private static final int DEFAULT_VALUE = 50;
 	
 	private String KEY = "slider";
-	private long slideValue;
-	private long DEFAULT_VALUE = 60000;
 	private Context context;
 	private SeekBar seekBar;
+	private TextView status;
 	
+	private int maximum = 100;
+	private int minimum = 0;
+	private int interval = 1;
+	private int currentValue;
+	
+	/**
+	 * one of two constructors for our class
+	 * @param context
+	 * @param attrs
+	 */
 	public SliderPreference(Context context, AttributeSet attrs) {
 		super(context, attrs);
+		initPreference(context, attrs); // custom class for initializing our preference
+//		setLayoutResource(R.layout.seek_bar_layout);
+//		setWidgetLayoutResource(R.layout.seek_bar_layout);
+//		setDefaultValue(DEFAULT_VALUE);
+//		setKey(KEY);
+	}
+	
+	/**
+	 * the second of two constructors
+	 * @param context
+	 * @param attrs
+	 * @param defStyle
+	 */
+	public SliderPreference(Context context, AttributeSet attrs, int defStyle) {
+		super(context, attrs, defStyle);
+		initPreference(context, attrs);
+	}
+	
+	/**
+	 * custom class for initializing our preferences
+	 * @param context
+	 * @param attrs
+	 */
+	private void initPreference(Context context, AttributeSet attrs) {
 		this.context=context;
-		setLayoutResource(R.layout.seek_bar_layout);
-		setWidgetLayoutResource(R.layout.seek_bar_layout);
-		setDefaultValue(DEFAULT_VALUE);
-		setKey(KEY);
+		setValuesFromXML(attrs);
+		// constructs a new seekbar
+		seekBar = new SeekBar(context, attrs);
+		// sets its max value
+		seekBar.setMax(maximum - minimum);
+		// assigns a listener
+		seekBar.setOnSeekBarChangeListener(this);
 	}
 	
-	protected void setOnPreferenceChangedListener(Preference.OnPreferenceChangeListener pclistener){
+	private void setValuesFromXML(AttributeSet attrs) {
+		maximum = attrs.getAttributeIntValue(ANDROIDNS, "max", 100);
+		minimum = attrs.getAttributeIntValue(PCTNS, "min", 0);
+		
+		try {
+			String newInterval = attrs.getAttributeValue(PCTNS, "insterval");
+			if(newInterval != null) interval = Integer.parseInt(newInterval);
+		} catch (Exception e) {
+			Log.e(TAG, "Invalid interval value", e);
+		}
 		
 	}
 	
-	protected void onBindView(View view) {
-		super.onBindView(view);
-		seekBar = (SeekBar) view.findViewById(R.id.seek_bar);
-	}
-	
-	protected void onClick() {
-		
-	}
-	
+	@Override
 	protected View onCreateView(ViewGroup parent) {
-		return super.onCreateView(parent);
-//		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		// skips the super
+		// creates a layout from our file
+		RelativeLayout layout = null;
+		try {
+			LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			layout = (RelativeLayout) inflater.inflate(R.layout.slider_preference, parent, false);
+		} catch(Exception e) {
+			Log.e(TAG, "Error creating seek bar preference", e);
+		}
+		return layout;
+		
+		// old stuff
+//		super.onCreateView(parent);
+//		*** the command above replaces layout resource with R.layout.stuff...
 //		return inflater.inflate(getLayoutResource(), parent);
 	}
 	
-	protected void onPrepareForRemoval() {
-		super.onPrepareForRemoval();
-		persistLong(slideValue);
-	}
-	
-	protected void onSetInitialValue(Boolean restorePersistedValue, Object defaultValue) {
-		if(restorePersistedValue) {
-			slideValue = this.getPersistedLong(DEFAULT_VALUE);
-		} else {
-			slideValue = (Long) defaultValue;
-			persistFloat(slideValue);
-		}
-	}
-
 	@Override
-	public boolean onPreferenceChange(Preference preference, Object newValue) {
-		if(preference.getClass().equals(SliderPreference.class)) {
-			slideValue = (Long) newValue;
+	protected void onBindView(View view) {
+		super.onBindView(view);
+		// move our seekBar into the view
+		try {
+			ViewParent oldContainer = seekBar.getParent();
+			ViewGroup newContainer = (ViewGroup) view.findViewById(R.id.slider_container);
+			if (oldContainer != newContainer) {
+				//remove the seekbar from the old view
+				if(oldContainer != null) {
+					((ViewGroup) oldContainer).removeView(seekBar);
+				}
+				// remove any existing seekBar in the container and add ours
+				newContainer.removeAllViews();
+				newContainer.addView(seekBar, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+			}
+		} catch (Exception e) {
+			Log.e(TAG, "Error binding view: " + e.toString());
 		}
-		return false;
-	}
-
-	protected void onRestoreInstanceState(Parcelable state) {
-		 // Check whether we saved the state in onSaveInstanceState
-	    if (state == null || !state.getClass().equals(SavedState.class)) {
-	        // Didn't save the state, so call superclass
-	        super.onRestoreInstanceState(state);
-	        return;
-	    }
-
-	    // Cast state to custom BaseSavedState and pass to superclass
-	    SavedState myState = (SavedState) state;
-	    super.onRestoreInstanceState(myState.getSuperState());
-	    
-	    // Set this Preference's widget to reflect the restored state
-	    //seekBar.setProgress((int)myState.value);
+		restore(true, (Integer) DEFAULT_VALUE);
+		updateView(view);	
 	}
 	
-	protected Parcelable onSaveIntanceState() {
-		final Parcelable superState = super.onSaveInstanceState();
-		// Check whether this Preference is persistent (continually saved)
-		if (isPersistent()) {
-			// No need to save instance state since it's persistent, use
-			// superclass state
-			return superState;
+	/**
+	 * update the slider_preference view with our current state
+	 * @param view
+	 */
+	protected void updateView(View view) {
+		try {
+			RelativeLayout layout = (RelativeLayout) view;
+			status = (TextView) layout.findViewById(R.id.slider_value);
+			status.setText(String.valueOf(currentValue));
+			status.setMinimumWidth(30);
+			seekBar.setProgress(currentValue-minimum);
+		} catch (Exception e) {
+			Log.e(TAG, "Error updating seek bar preference", e);
 		}
-
-		// Create instance of custom BaseSavedState
-		final SavedState myState = new SavedState(superState);
-		// Set the state's value with the class member that holds current
-		// setting value
-		myState.value = slideValue;
-		return myState;
 	}
 	
-	private static class SavedState extends BaseSavedState {
-	    // Member that holds the setting's value
-	    // Change this data type to match the type saved by your Preference
-	    long value;
-
-	    public SavedState(Parcelable superState) {
-	        super(superState);
-	    }
-
-	    public SavedState(Parcel source) {
-	        super(source);
-	        // Get the current preference's value
-	        value = source.readLong();  // Change this to read the appropriate data type
-	    }
-
-	    @Override
-	    public void writeToParcel(Parcel dest, int flags) {
-	        super.writeToParcel(dest, flags);
-	        // Write the preference's value
-	        dest.writeLong(value);  // Change this to write the appropriate data type
-	    }
-
-	    // Standard creator object using an instance of this class
-	    public static final Parcelable.Creator<SavedState> CREATOR =
-	            new Parcelable.Creator<SavedState>() {
-
-	        public SavedState createFromParcel(Parcel in) {
-	            return new SavedState(in);
-	        }
-
-	        public SavedState[] newArray(int size) {
-	            return new SavedState[size];
-	        }
-	    };
+	@Override
+	public void onProgressChanged(SeekBar seekBarArg, int progress, boolean fromUser) {
+		int newValue = progress + minimum;
+		
+		if(newValue > maximum) newValue = maximum;
+		else if(newValue < minimum) newValue = minimum;
+		else if(interval != 1 && newValue % interval != 0) newValue = Math.round(((float) newValue) / interval) * interval;
+		
+		// if the change is rejected revert to the previous value
+		if(!callChangeListener(newValue)) {
+			seekBarArg.setProgress(currentValue - minimum);
+			return;
+		}
+		
+		currentValue = newValue;
+		status.setText(String.valueOf(newValue));
+		persistInt(newValue);
 	}
-
+	
+	@Override
+	public void onStartTrackingTouch(SeekBar seekBarArg) {}
+	
+	@Override
+	public void onStopTrackingTouch(SeekBar seekBarArg) {
+		notifyChanged();
+	}
+	
+	@Override
+	protected Object onGetDefaultValue(TypedArray ta, int index) {
+		return ta.getInt(index, DEFAULT_VALUE);
+	}
+	
+	protected void onSetInitialValue(Boolean restoreValue, Object defaultValue) {
+		restore(restoreValue, defaultValue);
+	}
+	
+	private void restore(Boolean restoreValue, Object defaultValue) {
+		if(restoreValue) {
+			currentValue = getPersistedInt((Integer)defaultValue);
+		} else {
+			int temp = 0;
+			try {
+				temp = (Integer)defaultValue;
+			} catch(Exception e) {
+				Log.e(TAG, "Invalid default value: " + defaultValue.toString());
+			}
+			persistInt(temp);
+			currentValue = temp;
+		}
+	}
 }

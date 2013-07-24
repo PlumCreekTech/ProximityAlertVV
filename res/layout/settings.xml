@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" 
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android" 
+    xmlns:plumcreek="http://plumcreektechnology.com"
+    android:id="@+id/preference_screen"
     android:persistent="true"> 
      <SwitchPreference 
             android:key="onoff"
@@ -10,12 +13,22 @@
             
 	</SwitchPreference>
 	<com.plumcreektechnology.proximityalertv2.SliderPreference
-	    android:layout_width="match_parent"
-	    android:layout_height="wrap_content"
-	    android:enabled="true"
-	    android:persistent="true"
-	    android:selectable="false"
-	    android:shouldDisableView="true"
-	    />
+	    android:key="distance"
+	    android:title="Distance"
+	    android:defaultValue="60"
+	    android:max="200"
+	    plumcreek:min="10" />
+	<com.plumcreektechnology.proximityalertv2.SliderPreference
+	    android:key="volume"
+	    android:title="Volume"
+	    android:defaultValue="50"
+	    android:max="100"
+	    plumcreek:min="0" />
+	<com.plumcreektechnology.proximityalertv2.SliderPreference
+	    android:key="expiration"
+	    android:title="Expiration"
+	    android:defaultValue="60"
+	    android:max="1000"
+	    plumcreek:min="0" />
 
 </PreferenceScreen>

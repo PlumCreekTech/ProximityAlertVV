@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.location.LocationManager;
 import android.os.Binder;
 import android.os.IBinder;
-import android.widget.Toast;
 
 public class ProxAlertService extends Service implements ProxConstants{
 
