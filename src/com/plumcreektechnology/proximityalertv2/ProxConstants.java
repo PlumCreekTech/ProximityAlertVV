@@ -8,6 +8,7 @@ public interface ProxConstants {
 	 */
 	public static final long INVALID_LONG_VALUE = -999l;
 	public static final float INVALID_FLOAT_VALUE = -999.0f;
+	public static final double INVALID_DOUBLE_VALUE = -999.0d;
 	public static final int INVALID_INT_VALUE = -999;
 	/*
 	 * MyGeofence constants
