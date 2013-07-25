@@ -8,16 +8,15 @@
             android:key="onoff"
             android:title="Location Updates"
             android:defaultValue="true">
-            <intent
-                />
-            
 	</SwitchPreference>
 	<com.plumcreektechnology.proximityalertv2.SliderPreference
 	    android:key="distance"
 	    android:title="Distance"
-	    android:defaultValue="60"
-	    android:max="200"
-	    plumcreek:min="10" />
+	    plumcreek:interval="20"
+	    android:defaultValue="500"
+	    android:max="4000"
+	    plumcreek:min="200"
+	    plumcreek:metric=" m" />
 	<com.plumcreektechnology.proximityalertv2.SliderPreference
 	    android:key="volume"
 	    android:title="Volume"
@@ -27,8 +26,9 @@
 	<com.plumcreektechnology.proximityalertv2.SliderPreference
 	    android:key="expiration"
 	    android:title="Expiration"
-	    android:defaultValue="60"
-	    android:max="1000"
-	    plumcreek:min="0" />
+	    android:defaultValue="12"
+	    android:max="72"
+	    plumcreek:min="1"
+	    plumcreek:metric=" h" />
 
 </PreferenceScreen>

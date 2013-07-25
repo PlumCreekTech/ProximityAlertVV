@@ -2,8 +2,6 @@ package com.plumcreektechnology.proximityalertv2;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.preference.Preference;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -24,15 +22,16 @@ public class SliderPreference extends Preference implements OnSeekBarChangeListe
 	private static final String ANDROIDNS="http://schemas.android.com/apk/res/android";
 	private static final String PCTNS="http://plumcreektechnology.com";
 	private static final int DEFAULT_VALUE = 50;
-	
-	private String KEY = "slider";
+
 	private Context context;
 	private SeekBar seekBar;
 	private TextView status;
 	
-	private int maximum = 100;
-	private int minimum = 0;
-	private int interval = 1;
+	private String title;
+	private String metric;
+	private int maximum;
+	private int minimum;
+	private int interval;
 	private int currentValue;
 	
 	/**
@@ -42,11 +41,7 @@ public class SliderPreference extends Preference implements OnSeekBarChangeListe
 	 */
 	public SliderPreference(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		initPreference(context, attrs); // custom class for initializing our preference
-//		setLayoutResource(R.layout.seek_bar_layout);
-//		setWidgetLayoutResource(R.layout.seek_bar_layout);
-//		setDefaultValue(DEFAULT_VALUE);
-//		setKey(KEY);
+		initPreference(context, attrs); // custom method for initializing our preference
 	}
 	
 	/**
@@ -77,11 +72,14 @@ public class SliderPreference extends Preference implements OnSeekBarChangeListe
 	}
 	
 	private void setValuesFromXML(AttributeSet attrs) {
+		title = attrs.getAttributeValue(ANDROIDNS, "title");
+		interval = attrs.getAttributeIntValue(PCTNS,  "interval", 1);
+		metric = attrs.getAttributeValue(PCTNS, "metric");
 		maximum = attrs.getAttributeIntValue(ANDROIDNS, "max", 100);
 		minimum = attrs.getAttributeIntValue(PCTNS, "min", 0);
 		
 		try {
-			String newInterval = attrs.getAttributeValue(PCTNS, "insterval");
+			String newInterval = attrs.getAttributeValue(PCTNS, "interval");
 			if(newInterval != null) interval = Integer.parseInt(newInterval);
 		} catch (Exception e) {
 			Log.e(TAG, "Invalid interval value", e);
@@ -101,16 +99,15 @@ public class SliderPreference extends Preference implements OnSeekBarChangeListe
 			Log.e(TAG, "Error creating seek bar preference", e);
 		}
 		return layout;
-		
-		// old stuff
-//		super.onCreateView(parent);
-//		*** the command above replaces layout resource with R.layout.stuff...
-//		return inflater.inflate(getLayoutResource(), parent);
 	}
 	
 	@Override
 	protected void onBindView(View view) {
 		super.onBindView(view);
+		TextView tv = (TextView) view.findViewById(R.id.slider_title);
+		tv.setText(title);
+		tv = (TextView) view.findViewById(R.id.slider_metric);
+		tv.setText(metric);
 		// move our seekBar into the view
 		try {
 			ViewParent oldContainer = seekBar.getParent();

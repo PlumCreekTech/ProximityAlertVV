@@ -58,10 +58,9 @@ public class MainActivity extends FragmentActivity implements ProxConstants,
 		- when the map view is up and a dialog comes up, a marker is placed at the point interest
 	*/
 		
-	
+	// TODO FIGURE OUT WHY ON EARTH IT DOESN'T WORK IN THE BACKGROUND!!!
 	// TODO figure out if we want the map to be the default screen, call the fragments appropriately
 	// TODO change the frequency of map update based on mode of transportation (or speed of...)
-	// TODO !!! add a marker to the map when the user is interested in a point
 	// TODO get directions (use https to be secure)
 	// TODO disable autocentering user when they are looking at a point (only autocenter when nothing else is happening)
 	private TreeMap<String, MyGeofence> tree;
@@ -212,6 +211,7 @@ public class MainActivity extends FragmentActivity implements ProxConstants,
 	}
 	
 	protected void onNewIntent(Intent intent) {
+		Toast.makeText(this, "application started", Toast.LENGTH_LONG).show();
 		dialogAlert = intent.getBooleanExtra("dialog", false);
 		if(dialogAlert && !runningInterface) { // if we are creating a dialog and the user interface was not being displayed (hide the user interface)
 			//remove preexisting fragments
@@ -231,7 +231,6 @@ public class MainActivity extends FragmentActivity implements ProxConstants,
 			MyGeofence tempFence = tree.get(intent.getStringExtra("POI"));
 			Bundle fragBundle = new Bundle();
 			fragBundle.putString("POI", tempFence.getId());
-			fragBundle.putString("URI", tempFence.getUri());
 			fragBundle.putInt("ICON", tempFence.getDrawable());
 			if(runningInterface) {
 				fragBundle.putBoolean("hideAfter", false);
@@ -408,23 +407,47 @@ public class MainActivity extends FragmentActivity implements ProxConstants,
 		return size;
 	}
 
+	/**
+	 * part of the ChangeList interface
+	 * CHANGED modified this to adapt for AffirmativeFragment
+	 */
 	@Override
 	public void update(String name, boolean flag) { // a slightly eccentric work-around to updating GUI
-		for (int i = 0; i < size; i++) {			// depending on how the user responds to the alert
-			if ( name.equals(treeList.get(i)) ) {	// if the list is in view, change it in the GUI
-				if(userFragment.isVisible()) {
-					ListView lview = userFragment.getListView();
-					lview.setItemChecked( i, flag);
+		if (flag) { // flag will be true if they want more info about the point
+			AffirmativeFragment afrag = new AffirmativeFragment();
+			MyGeofence tempFence = tree.get(name);
+			Bundle fragBundle = new Bundle();
+			fragBundle.putString("POI", tempFence.getId());
+			fragBundle.putString("URI", tempFence.getUri());
+			fragBundle.putInt("ICON", tempFence.getDrawable());
+			if(runningInterface) {
+				fragBundle.putBoolean("hideAfter", false);
+			} else fragBundle.putBoolean("hideAfter", true);
+			afrag.setArguments(fragBundle);
+			afrag.show(fragMan, null);
+		} else {	// flag will be false if they want to remove the point from interest
+			for (int i = 0; i < size; i++) { // depending on how the user
+												// responds to the alert
+				if (name.equals(treeList.get(i))) { // if the list is in view,
+													// change it in the GUI
+					if (userFragment.isVisible()) {
+						ListView lview = userFragment.getListView();
+						lview.setItemChecked(i, false);
+					} else { // if the list fragment is hidden, change shared
+								// preferences so the next time it loads it will
+								// be updated
+						SharedPreferences.Editor ed = getSharedPreferences(
+								UserFragment.KEY_THIS_PREFERENCE,
+								Context.MODE_PRIVATE).edit();
+						ed.putBoolean(UserFragment.getItemPreferenceKey(i),
+								false);
+						ed.commit();
+					}
+					break;
 				}
-				else {	// if the list fragment is hidden, change shared preferences so the next time it loads it will be updated
-					SharedPreferences.Editor ed = getSharedPreferences(UserFragment.KEY_THIS_PREFERENCE, Context.MODE_PRIVATE).edit();
-					ed.putBoolean(UserFragment.getItemPreferenceKey(i), flag);
-					ed.commit();
-				}
-				break;
 			}
+			onPointSelect(name, false);
 		}
-		onPointSelect(name, flag);
 	}
 
 	/**
@@ -522,6 +545,9 @@ public class MainActivity extends FragmentActivity implements ProxConstants,
 	}
 
 	
+	/**
+	 * CHANGED added this method to respond to AffirmativeFragment
+	 */
 	@Override
 	public void goMap(String name) {
 		MyGeofence tempFence = tree.get(name);
